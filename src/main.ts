@@ -19,6 +19,8 @@ export default class ImageToolkitPlugin extends Plugin {
   public diagramSelector: string = ``;
 
   private static readonly IMG_ORIGIN_CURSOR = 'data-oit-origin-cursor';
+  private static readonly EDITOR_IMAGE_LAYOUT_CLASS = 'oit-editor-image-layout';
+  private static readonly EDITOR_IMAGE_MAX_HEIGHT_VAR = '--oit-editor-image-max-height';
 
   // data-oit-event: 标识new window是否已addEventListener for click
   private static readonly POPOUT_WINDOW_EVENT = 'data-oit-event';
@@ -35,6 +37,7 @@ export default class ImageToolkitPlugin extends Plugin {
 
     await this.initContainer(this.settings.viewMode);
 
+    this.refreshEditorImageLayout();
     this.refreshViewTrigger();
 
     // addEventListener for opened new windows
@@ -48,6 +51,7 @@ export default class ImageToolkitPlugin extends Plugin {
               const eventId = randomUUID();
               this.initContainer(this.settings.viewMode, eventId);
               bodyEl.setAttr(ImageToolkitPlugin.POPOUT_WINDOW_EVENT, eventId);
+              this.refreshEditorImageLayout(bodyEl.ownerDocument);
               this.refreshViewTrigger(bodyEl.ownerDocument);
             }
           }
@@ -62,6 +66,7 @@ export default class ImageToolkitPlugin extends Plugin {
     this.getAllContainerViews().forEach(container => {
       container.removeOitContainerView();
     });
+    this.clearEditorImageLayoutInAllDocuments();
     this.containerFactory.clearAll();
     if (this.imgSelector) {
       document.off('click', this.imgSelector, this.clickImage);
@@ -123,6 +128,52 @@ export default class ImageToolkitPlugin extends Plugin {
 
   public getAllContainerViews = (): ContainerView[] => {
     return this.containerFactory.getAllContainers();
+  }
+
+  public refreshEditorImageLayout = (doc?: Document) => {
+    if (doc) {
+      this.updateEditorImageLayout(doc);
+      return;
+    }
+    this.updateEditorImageLayoutInAllDocuments();
+  }
+
+  private updateEditorImageLayoutInAllDocuments = () => {
+    this.updateEditorImageLayout(document);
+    this.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
+      const ownerDocument = leaf.view.containerEl.ownerDocument;
+      if (ownerDocument && ownerDocument !== document) {
+        this.updateEditorImageLayout(ownerDocument);
+      }
+    });
+  }
+
+  private clearEditorImageLayoutInAllDocuments = () => {
+    this.clearEditorImageLayout(document);
+    this.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
+      const ownerDocument = leaf.view.containerEl.ownerDocument;
+      if (ownerDocument && ownerDocument !== document) {
+        this.clearEditorImageLayout(ownerDocument);
+      }
+    });
+  }
+
+  private updateEditorImageLayout = (doc: Document) => {
+    const maxHeight = this.normalizeThumbnailMaxHeight(this.settings.thumbnailMaxHeight);
+    doc?.body?.classList.add(ImageToolkitPlugin.EDITOR_IMAGE_LAYOUT_CLASS);
+    doc?.body?.style.setProperty(ImageToolkitPlugin.EDITOR_IMAGE_MAX_HEIGHT_VAR, `${maxHeight}px`);
+  }
+
+  private clearEditorImageLayout = (doc: Document) => {
+    doc?.body?.classList.remove(ImageToolkitPlugin.EDITOR_IMAGE_LAYOUT_CLASS);
+    doc?.body?.style.removeProperty(ImageToolkitPlugin.EDITOR_IMAGE_MAX_HEIGHT_VAR);
+  }
+
+  private normalizeThumbnailMaxHeight = (value: number): number => {
+    if (!Number.isFinite(value)) {
+      return DEFAULT_SETTINGS.thumbnailMaxHeight;
+    }
+    return Math.max(50, Math.min(1000, Math.floor(value)));
   }
 
   private initContainer = async (viewMode: ViewMode, popoutWindowEventId?: string) => {

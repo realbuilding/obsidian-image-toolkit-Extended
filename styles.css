@@ -17,6 +17,33 @@ body {
     mix-blend-mode: screen;
 }
 
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .image-embed,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .mermaid,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .block-language-d2,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .d2-chart {
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] img:not(.oit-img-view),
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .mermaid > svg,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .block-language-d2 svg,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .block-language-d2 img,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .d2-chart svg,
+body.oit-editor-image-layout .workspace-leaf-content[data-type='markdown'] .d2-chart img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: var(--oit-editor-image-max-height, 360px) !important;
+    object-fit: contain;
+    vertical-align: top;
+}
+
 .oit-normal {
     position: fixed;
     font-size: 0;
