@@ -43,6 +43,7 @@ export class DiagramUtil {
   private static createSvgImageSource = (targetEl: HTMLElement, svgEl: SVGSVGElement): DiagramImageSource => {
     const clonedSvg = svgEl.cloneNode(true) as SVGSVGElement;
     DiagramUtil.ensureSvgSize(clonedSvg, svgEl);
+    DiagramUtil.ensureSvgBackground(clonedSvg, targetEl);
     if (!clonedSvg.getAttribute('xmlns')) {
       clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     }
@@ -73,6 +74,30 @@ export class DiagramUtil {
 
     if (width) clonedSvg.setAttribute('width', width + 'px');
     if (height) clonedSvg.setAttribute('height', height + 'px');
+  }
+
+  private static ensureSvgBackground = (clonedSvg: SVGSVGElement, targetEl: HTMLElement) => {
+    if (!DiagramUtil.shouldUseWhiteBackground(targetEl)) return;
+
+    const backgroundEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const viewBox = clonedSvg.viewBox?.baseVal;
+    if (viewBox?.width && viewBox?.height) {
+      backgroundEl.setAttribute('x', String(viewBox.x));
+      backgroundEl.setAttribute('y', String(viewBox.y));
+      backgroundEl.setAttribute('width', String(viewBox.width));
+      backgroundEl.setAttribute('height', String(viewBox.height));
+    } else {
+      backgroundEl.setAttribute('x', '0');
+      backgroundEl.setAttribute('y', '0');
+      backgroundEl.setAttribute('width', '100%');
+      backgroundEl.setAttribute('height', '100%');
+    }
+    backgroundEl.setAttribute('fill', '#fff');
+    clonedSvg.insertBefore(backgroundEl, clonedSvg.firstChild);
+  }
+
+  private static shouldUseWhiteBackground = (targetEl: HTMLElement): boolean => {
+    return !!targetEl?.hasClass('mermaid');
   }
 
   private static parsePositiveNumber = (value: string): number => {
