@@ -86,6 +86,7 @@ export class PinContainerView extends ContainerView {
     if (!activeImg && !(activeImg = this.imgGlobalStatus.activeImg)) return;
     // console.log('closeContainerView', event, activeImg)
     this.renderImgView(activeImg.imgViewEl, '', '');
+    this.releaseObjectUrl(activeImg);
     activeImg.popup = false;
     activeImg.mtime = 0;
 

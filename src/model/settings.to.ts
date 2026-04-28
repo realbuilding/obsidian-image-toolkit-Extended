@@ -7,6 +7,7 @@ export interface SettingsIto {
   viewMode: ViewMode;
 
   viewImageInEditor: boolean;
+  viewDiagramInEditor: boolean;
   // CPB = Community Plugins Browser
   viewImageInCPB: boolean;
   viewImageWithLink: boolean;

@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: SettingsIto = {
   viewMode: ViewMode.Normal,
 
   viewImageInEditor: true,
+  viewDiagramInEditor: true,
   viewImageInCPB: true,
   viewImageWithLink: true,
   viewImageOther: true,
@@ -398,6 +399,17 @@ export class ImageToolkitSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.viewImageInEditor)
         .onChange(async (value) => {
           this.plugin.settings.viewImageInEditor = value;
+          this.plugin.refreshViewTrigger();
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName(t("VIEW_DIAGRAM_IN_EDITOR_NAME"))
+      .setDesc(t("VIEW_DIAGRAM_IN_EDITOR_DESC"))
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.viewDiagramInEditor)
+        .onChange(async (value) => {
+          this.plugin.settings.viewDiagramInEditor = value;
           this.plugin.refreshViewTrigger();
           await this.plugin.saveSettings();
         }));

@@ -152,6 +152,10 @@ export const VIEW_IMG_SELECTOR = {
   OTHER_NO_LINK: `.modal-content img:not(a img)`,
 }
 
+export const VIEW_DIAGRAM_SELECTOR = {
+  EDITOR_AREAS: `.workspace-leaf-content[data-type='markdown'] .mermaid,.workspace-leaf-content[data-type='markdown'] .d2-chart`
+}
+
 export const IMG_BORDER_WIDTH = {
   THIN: 'thin',
   MEDIUM: 'medium',

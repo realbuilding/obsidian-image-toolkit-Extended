@@ -93,6 +93,7 @@ export class NormalContainerView extends ContainerView {
       this.imgInfo.oitContainerEl.style.setProperty('display', 'none'); // hide 'oit-normal'
       this.renderImgTitle('', '');
       this.renderImgView(activeImg.imgViewEl, '', '');
+      this.releaseObjectUrl(activeImg);
       // remove events
       this.imgGlobalStatus.popup = false;
       activeImg.popup = false;

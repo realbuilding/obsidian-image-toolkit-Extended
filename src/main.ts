@@ -1,12 +1,13 @@
 import { addIcon, Plugin, WorkspaceLeaf } from 'obsidian';
 import { DEFAULT_SETTINGS, ImageToolkitSettingTab } from './conf/settings'
-import {DEFAULT_VIEW_MODE, ICONS, MOVE_THE_IMAGE, SWITCH_THE_IMAGE, VIEW_IMG_SELECTOR, ViewMode} from './conf/constants'
+import {DEFAULT_VIEW_MODE, ICONS, MOVE_THE_IMAGE, SWITCH_THE_IMAGE, VIEW_DIAGRAM_SELECTOR, VIEW_IMG_SELECTOR, ViewMode} from './conf/constants'
 import { NormalContainerView } from './ui/container/normalContainer.view';
 import { PinContainerView } from './ui/container/pinContainer.view';
 import { ContainerView } from "./ui/container/container.view";
 import { SettingsIto } from "./model/settings.to";
 import { ContainerFactory } from "./factory/containerFactory";
 import { randomUUID } from "crypto";
+import {DiagramUtil} from "./util/diagramUtil";
 
 export default class ImageToolkitPlugin extends Plugin {
 
@@ -15,6 +16,7 @@ export default class ImageToolkitPlugin extends Plugin {
   private readonly containerFactory = new ContainerFactory();
 
   public imgSelector: string = ``;
+  public diagramSelector: string = ``;
 
   private static readonly IMG_ORIGIN_CURSOR = 'data-oit-origin-cursor';
 
@@ -61,9 +63,16 @@ export default class ImageToolkitPlugin extends Plugin {
       container.removeOitContainerView();
     });
     this.containerFactory.clearAll();
-    document.off('click', this.imgSelector, this.clickImage);
-    document.off('mouseover', this.imgSelector, this.mouseoverImg);
-    document.off('mouseout', this.imgSelector, this.mouseoutImg);
+    if (this.imgSelector) {
+      document.off('click', this.imgSelector, this.clickImage);
+      document.off('mouseover', this.imgSelector, this.mouseoverImg);
+      document.off('mouseout', this.imgSelector, this.mouseoutImg);
+    }
+    if (this.diagramSelector) {
+      document.off('click', this.diagramSelector, this.clickDiagram);
+      document.off('mouseover', this.diagramSelector, this.mouseoverDiagram);
+      document.off('mouseout', this.diagramSelector, this.mouseoutDiagram);
+    }
   }
 
   private async loadSettings() {
@@ -154,6 +163,17 @@ export default class ImageToolkitPlugin extends Plugin {
   private isClickable = (targetEl: HTMLImageElement, event: MouseEvent): ContainerView => {
     let container: ContainerView;
     if (this.isImageElement(targetEl)
+      && !this.isInsideDiagram(targetEl)
+      && (container = this.containerFactory.getContainer(targetEl))
+      && container.checkHotkeySettings(event, this.settings.viewTriggerHotkey)) {
+      return container;
+    }
+    return null;
+  }
+
+  private isClickableDiagram = (targetEl: HTMLElement, event: MouseEvent): ContainerView => {
+    let container: ContainerView;
+    if (targetEl
       && (container = this.containerFactory.getContainer(targetEl))
       && container.checkHotkeySettings(event, this.settings.viewTriggerHotkey)) {
       return container;
@@ -190,8 +210,15 @@ export default class ImageToolkitPlugin extends Plugin {
       doc.off('click', this.imgSelector, this.clickImage);
       doc.off('mouseover', this.imgSelector, this.mouseoverImg);
       doc.off('mouseout', this.imgSelector, this.mouseoutImg);
+      this.imgSelector = '';
     }
-    if (!viewImageOther && !viewImageInEditor && !viewImageInCPB && !viewImageWithLink) {
+    if (this.diagramSelector) {
+      doc.off('click', this.diagramSelector, this.clickDiagram);
+      doc.off('mouseover', this.diagramSelector, this.mouseoverDiagram);
+      doc.off('mouseout', this.diagramSelector, this.mouseoutDiagram);
+      this.diagramSelector = '';
+    }
+    if (!viewImageOther && !viewImageInEditor && !viewImageInCPB && !viewImageWithLink && !this.settings.viewDiagramInEditor) {
       return;
     }
     let selector = ``;
@@ -213,6 +240,13 @@ export default class ImageToolkitPlugin extends Plugin {
       doc.on('click', this.imgSelector, this.clickImage);
       doc.on('mouseover', this.imgSelector, this.mouseoverImg);
       doc.on('mouseout', this.imgSelector, this.mouseoutImg);
+    }
+
+    if (viewImageInEditor && this.settings.viewDiagramInEditor) {
+      this.diagramSelector = VIEW_DIAGRAM_SELECTOR.EDITOR_AREAS;
+      doc.on('click', this.diagramSelector, this.clickDiagram);
+      doc.on('mouseover', this.diagramSelector, this.mouseoverDiagram);
+      doc.on('mouseout', this.diagramSelector, this.mouseoutDiagram);
     }
   }
 
@@ -241,6 +275,42 @@ export default class ImageToolkitPlugin extends Plugin {
       return;
     }
     targetEl.style.cursor = targetEl.getAttribute(ImageToolkitPlugin.IMG_ORIGIN_CURSOR);
+  }
+
+  private clickDiagram = (event: MouseEvent) => {
+    const targetEl = this.getClosestDiagramElement(event.target as HTMLElement);
+    const container: ContainerView = this.isClickableDiagram(targetEl, event);
+    if (!container) return;
+
+    const source = DiagramUtil.createImageSource(targetEl);
+    if (!source) return;
+    event.preventDefault();
+    event.stopPropagation();
+    container.renderDiagramContainer(targetEl, source.src, source.alt, source.objectUrl);
+  }
+
+  private mouseoverDiagram = (event: MouseEvent) => {
+    const targetEl = this.getClosestDiagramElement(event.target as HTMLElement);
+    if (!this.isClickableDiagram(targetEl, event)) return;
+    if (null == targetEl.getAttribute(ImageToolkitPlugin.IMG_ORIGIN_CURSOR)) {
+      targetEl.setAttribute(ImageToolkitPlugin.IMG_ORIGIN_CURSOR, targetEl.style.cursor || '');
+    }
+    targetEl.style.cursor = 'zoom-in';
+  }
+
+  private mouseoutDiagram = (event: MouseEvent) => {
+    const targetEl = this.getClosestDiagramElement(event.target as HTMLElement);
+    if (!this.isClickableDiagram(targetEl, event)) return;
+    targetEl.style.cursor = targetEl.getAttribute(ImageToolkitPlugin.IMG_ORIGIN_CURSOR);
+  }
+
+  private getClosestDiagramElement = (targetEl: HTMLElement): HTMLElement => {
+    if (!targetEl || !this.diagramSelector) return null;
+    return targetEl.closest(this.diagramSelector) as HTMLElement;
+  }
+
+  private isInsideDiagram = (targetEl: HTMLElement): boolean => {
+    return !!this.getClosestDiagramElement(targetEl);
   }
 
 }
