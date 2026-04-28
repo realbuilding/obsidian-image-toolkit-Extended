@@ -278,6 +278,8 @@ export default class ImageToolkitPlugin extends Plugin {
   }
 
   private clickDiagram = (event: MouseEvent) => {
+    if (this.isDiagramControlClick(event.target as HTMLElement)) return;
+
     const targetEl = this.getClosestDiagramElement(event.target as HTMLElement);
     const container: ContainerView = this.isClickableDiagram(targetEl, event);
     if (!container) return;
@@ -307,6 +309,10 @@ export default class ImageToolkitPlugin extends Plugin {
   private getClosestDiagramElement = (targetEl: HTMLElement): HTMLElement => {
     if (!targetEl || !this.diagramSelector) return null;
     return targetEl.closest(this.diagramSelector) as HTMLElement;
+  }
+
+  private isDiagramControlClick = (targetEl: HTMLElement): boolean => {
+    return !!targetEl?.closest('.Preview__Recompile');
   }
 
   private isInsideDiagram = (targetEl: HTMLElement): boolean => {

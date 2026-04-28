@@ -87,7 +87,7 @@ export class DiagramUtil {
     if (!targetEl) return 'Diagram';
     if (targetEl.hasClass('mermaid')) return 'Mermaid diagram';
     if (targetEl.hasClass('block-language-plantuml')) return 'PlantUML diagram';
-    if (targetEl.hasClass('d2-chart')) return 'D2 diagram';
+    if (targetEl.hasClass('block-language-d2') || targetEl.hasClass('d2-chart')) return 'D2 diagram';
     return targetEl.getAttribute('aria-label') || targetEl.getAttribute('title') || 'Diagram';
   }
 

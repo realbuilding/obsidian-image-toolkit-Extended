@@ -17,7 +17,7 @@
 ### 4.1 智能容器识别 (Smart Capture)
 * **拦截范围扩展**：除了监听 `<img>`，新增对特定 CSS 类名的点击监听。
     * **优先级 1 (P0)**: `.mermaid` (最通用)
-    * **优先级 2 (P1)**: `.d2-chart`
+    * **优先级 2 (P1)**: `.block-language-d2`，兼容保留 `.d2-chart`
     * **兼容说明**: PlantUML 如果已经渲染为普通 `<img>`，继续走现有图片预览逻辑；仅当遇到 SVG-only 的 PlantUML 渲染器时，再追加 `.block-language-plantuml` 等选择器。
     * **优先级 3 (P2)**: 用户自定义 CSS 选择器 (可在设置页面配置)
 * **动作响应**：点击上述容器时，自动提取其内部生成的 **SVG 元素**。
@@ -56,9 +56,12 @@
 ### 7.2 第一阶段范围
 第一阶段优先支持当前普通图片链路尚未覆盖的常见 Obsidian 渲染结果：
 * `.mermaid`
-* `.d2-chart`
+* `.block-language-d2`
+* `.d2-chart`（兼容保留）
 
 PlantUML 在当前环境中如果已经渲染为普通图片，则保持原有处理方式，不默认拦截 `.block-language-plantuml`，避免改变现有图片交互和 Gallery Navbar 行为。
+
+官方 D2 Obsidian 插件的渲染容器类名是 `.block-language-d2`，并且容器中可能带有 `.Preview__Recompile` 按钮。图表预览只接管图表点击，需避开该按钮，保证 D2 自带的重新编译功能仍然可用。
 
 处理规则：
 1. 点击上述容器时，先检查是否满足现有 `viewTriggerHotkey` 设置。
