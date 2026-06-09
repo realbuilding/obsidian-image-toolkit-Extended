@@ -153,7 +153,7 @@ export const VIEW_IMG_SELECTOR = {
 }
 
 export const VIEW_DIAGRAM_SELECTOR = {
-  EDITOR_AREAS: `.workspace-leaf-content[data-type='markdown'] .mermaid,.workspace-leaf-content[data-type='markdown'] .block-language-d2,.workspace-leaf-content[data-type='markdown'] .d2-chart`
+  EDITOR_AREAS: `.workspace-leaf-content[data-type='markdown'] .mermaid,.workspace-leaf-content[data-type='markdown'] .block-language-d2,.workspace-leaf-content[data-type='markdown'] .d2-chart,.workspace-leaf-content[data-type='markdown'] .block-language-plantuml,.workspace-leaf-content[data-type='markdown'] .block-language-plantuml-svg`
 }
 
 export const IMG_BORDER_WIDTH = {

@@ -74,7 +74,7 @@ export default class ImageToolkitPlugin extends Plugin {
       document.off('mouseout', this.imgSelector, this.mouseoutImg);
     }
     if (this.diagramSelector) {
-      document.off('click', this.diagramSelector, this.clickDiagram);
+      document.removeEventListener('click', this.clickDiagram, true);
       document.off('mouseover', this.diagramSelector, this.mouseoverDiagram);
       document.off('mouseout', this.diagramSelector, this.mouseoutDiagram);
     }
@@ -264,7 +264,7 @@ export default class ImageToolkitPlugin extends Plugin {
       this.imgSelector = '';
     }
     if (this.diagramSelector) {
-      doc.off('click', this.diagramSelector, this.clickDiagram);
+      doc.removeEventListener('click', this.clickDiagram, true);
       doc.off('mouseover', this.diagramSelector, this.mouseoverDiagram);
       doc.off('mouseout', this.diagramSelector, this.mouseoutDiagram);
       this.diagramSelector = '';
@@ -295,7 +295,7 @@ export default class ImageToolkitPlugin extends Plugin {
 
     if (viewImageInEditor && this.settings.viewDiagramInEditor) {
       this.diagramSelector = VIEW_DIAGRAM_SELECTOR.EDITOR_AREAS;
-      doc.on('click', this.diagramSelector, this.clickDiagram);
+      doc.addEventListener('click', this.clickDiagram, true);
       doc.on('mouseover', this.diagramSelector, this.mouseoverDiagram);
       doc.on('mouseout', this.diagramSelector, this.mouseoutDiagram);
     }
@@ -338,7 +338,7 @@ export default class ImageToolkitPlugin extends Plugin {
     const source = DiagramUtil.createImageSource(targetEl);
     if (!source) return;
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     container.renderDiagramContainer(targetEl, source.src, source.alt, source.objectUrl);
   }
 
