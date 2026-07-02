@@ -1,6 +1,6 @@
-import { addIcon, Plugin, WorkspaceLeaf } from 'obsidian';
+import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { DEFAULT_SETTINGS, ImageToolkitSettingTab } from './conf/settings'
-import {DEFAULT_VIEW_MODE, ICONS, MOVE_THE_IMAGE, SWITCH_THE_IMAGE, VIEW_DIAGRAM_SELECTOR, VIEW_IMG_SELECTOR, ViewMode} from './conf/constants'
+import {DEFAULT_VIEW_MODE, MOVE_THE_IMAGE, SWITCH_THE_IMAGE, VIEW_DIAGRAM_SELECTOR, VIEW_IMG_SELECTOR, ViewMode} from './conf/constants'
 import { NormalContainerView } from './ui/container/normalContainer.view';
 import { PinContainerView } from './ui/container/pinContainer.view';
 import { ContainerView } from "./ui/container/container.view";
@@ -14,6 +14,11 @@ export default class ImageToolkitPlugin extends Plugin {
   public settings: SettingsIto;
 
   private readonly containerFactory = new ContainerFactory();
+
+  // auxiliary Pin-mode containers used by the "pin this image" toolbar action in Normal mode;
+  // kept independent of `settings.viewMode` so the global mode is never switched by this action.
+  // key: '' for the main window, otherwise the popout window's event id
+  private readonly pinModeContainers: Map<string, PinContainerView> = new Map();
 
   public imgSelector: string = ``;
   public diagramSelector: string = ``;
@@ -66,6 +71,8 @@ export default class ImageToolkitPlugin extends Plugin {
     this.getAllContainerViews().forEach(container => {
       container.removeOitContainerView();
     });
+    this.pinModeContainers.forEach(container => container.removeOitContainerView());
+    this.pinModeContainers.clear();
     this.clearEditorImageLayoutInAllDocuments();
     this.containerFactory.clearAll();
     if (this.imgSelector) {
@@ -83,17 +90,10 @@ export default class ImageToolkitPlugin extends Plugin {
   private async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     await this.checkViewMode(this.getViewMode());
-    await this.addIcons();
   }
 
   public async saveSettings() {
     await this.saveData(this.settings);
-  }
-
-  private addIcons = async () => {
-    for (const icon of ICONS) {
-      addIcon(icon.id, icon.svg);
-    }
   }
 
   async registerCommands() {
@@ -230,6 +230,22 @@ export default class ImageToolkitPlugin extends Plugin {
       return container;
     }
     return null;
+  }
+
+  /**
+   * Get (or lazily create) the auxiliary Pin-mode container for the window that `targetEl` belongs to.
+   * Used only by the "pin this image" toolbar action in Normal mode; does not touch `settings.viewMode`.
+   * @param targetEl
+   */
+  public getPinModeContainer = (targetEl: HTMLElement): PinContainerView => {
+    const bodyEl = targetEl?.matchParent('body');
+    const key = bodyEl?.getAttribute(ImageToolkitPlugin.POPOUT_WINDOW_EVENT) || '';
+    let pinContainer = this.pinModeContainers.get(key);
+    if (!pinContainer) {
+      pinContainer = new PinContainerView(this);
+      this.pinModeContainers.set(key, pinContainer);
+    }
+    return pinContainer;
   }
 
   public switchViewMode = async (viewMode: ViewMode) => {

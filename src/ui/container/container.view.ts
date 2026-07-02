@@ -836,6 +836,14 @@ export abstract class ContainerView {
     activeImgViewEl.style.setProperty('margin-left', zoomData.left + 'px', 'important');
   }
 
+  /**
+   * Pin the currently active image onto the screen without switching the plugin's global view mode.
+   * Only meaningful in Normal mode; no-op elsewhere.
+   * @param activeImg
+   */
+  protected switchToPinMode = (activeImg: ImgCto): void => {
+  }
+
   public clickImgToolbar = (event: MouseEvent, targetElClass?: string, activeImg?: ImgCto): void => {
     if (!targetElClass && !activeImg) {
       if (!event) return;
@@ -881,6 +889,9 @@ export abstract class ContainerView {
         break;
       case 'toolbar_copy':
         ImgUtil.copyImage(activeImg.imgViewEl, activeImg.curWidth, activeImg.curHeight);
+        break;
+      case 'toolbar_switch_to_pin_mode':
+        this.switchToPinMode(activeImg);
         break;
       case 'toolbar_close':
         this.closeContainerView(event, activeImg);

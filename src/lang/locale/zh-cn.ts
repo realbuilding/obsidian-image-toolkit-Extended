@@ -127,6 +127,7 @@ export default {
   SCALE_Y: 'y轴翻转',
   INVERT_COLOR: '反色',
   COPY: '复制',
+  SWITCH_TO_PIN_MODE: '贴图',
   CLOSE: '关闭',
 
   // tip:

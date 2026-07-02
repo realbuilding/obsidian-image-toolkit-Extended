@@ -20,6 +20,10 @@ export class PinContainerView extends ContainerView {
     this.imgGlobalStatus.activeImg = imgCto;
   }
 
+  // a PinContainerView instance is always in Pin mode, regardless of the plugin's global view mode setting
+  public isPinMode = (): boolean => true;
+  public isNormalMode = (): boolean => false;
+
   //region ================== Container View ========================
   public initContainerDom = (parentContainerEl: Element): ImgCto => {
     /*

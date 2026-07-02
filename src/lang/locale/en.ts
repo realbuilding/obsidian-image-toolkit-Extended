@@ -136,6 +136,7 @@ export default {
   SCALE_Y: 'flip along y-axis',
   INVERT_COLOR: 'invert color',
   COPY: 'copy',
+  SWITCH_TO_PIN_MODE: 'pin this image',
   CLOSE: 'close',
 
   // tip:

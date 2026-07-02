@@ -18,6 +18,7 @@ export default {
   SCALE_Y: 'y 軸縮放',
   INVERT_COLOR: '色彩反轉',
   COPY: '複製',
+  SWITCH_TO_PIN_MODE: '貼圖',
 
   COPY_IMAGE_SUCCESS: '成功複製圖片！'
 
